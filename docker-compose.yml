@@ -19,7 +19,7 @@ services:
             - "127.0.0.1:8080:8080"
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
-    
+
     # UI pointing towards the director
     director-ui:
         image: ${REGISTRY}/ui/ng:${FF_VERSION}
@@ -32,7 +32,7 @@ services:
             - "traefik.http.services.ui.loadbalancer.server.port=8080"
             - "traefik.http.routers.ui.rule=PathPrefix(`/fact-finder-ui`)"
             - "traefik.http.routers.ui.entrypoints=web"
-    
+
     # Director which is used to change configuration via UI, receive delta-updates, etc.
     director:
         image: ${REGISTRY}/ff/ng:${FF_VERSION}
@@ -58,6 +58,11 @@ services:
             # Message queue for features like A/B testing. Change login data according to your settings.
             # For further information please refer to the RabbitMQ documentation
             - rabbitmq.uri=amqp://rabbitmquser:rabbitmqsecurepassword@rabbitmq:5672
+        # Tune tcp keepalive settings for ipvs loadbalancer used e.g. by docker swarm.
+        # See https://web.archive.org/web/20200614124130if_/https://success.docker.com/article/ipvs-connection-timeout-issue
+        # for more details.
+        sysctls:
+            - net.ipv4.tcp_keepalive_time=600
         labels:
             - "traefik.enable=true"
             - "traefik.http.services.director.loadbalancer.server.port=8080"
@@ -72,7 +77,7 @@ services:
         volumes:
             # Mount resource directory for FACT-Finder configuration
             - ./resources:/home/factfinder/fact-finder
-    
+
     # Worker 1 to respond to search requests. You can add more workers.
     worker-1:
         image: ${REGISTRY}/ff/ng:${FF_VERSION}
@@ -114,6 +119,11 @@ services:
             # Message queue for features like A/B testing. Change login data according to your settings.
             # For further information please refer to the RabbitMQ documentation
             - rabbitmq.uri=amqp://rabbitmquser:rabbitmqsecurepassword@rabbitmq:5672
+        # Tune tcp keepalive settings for ipvs loadbalancer used e.g. by docker swarm.
+        # See https://web.archive.org/web/20200614124130if_/https://success.docker.com/article/ipvs-connection-timeout-issue
+        # for more details.
+        sysctls:
+            - net.ipv4.tcp_keepalive_time=600
         labels:
             - "traefik.enable=true"
             - "traefik.http.services.worker.loadbalancer.server.port=8080"
@@ -127,7 +137,7 @@ services:
         volumes:
             # Mount resource directory for FACT-Finder configuration
             - ./resources:/home/factfinder/fact-finder
-    
+
     # Worker 2 to respond to search requests. You can add more workers.
     worker-2:
         image: ${REGISTRY}/ff/ng:${FF_VERSION}
@@ -169,6 +179,11 @@ services:
             # Message queue for features like A/B testing. Change login data according to your settings.
             # For further information please refer to the RabbitMQ documentation
             - rabbitmq.uri=amqp://rabbitmquser:rabbitmqsecurepassword@rabbitmq:5672
+        # Tune tcp keepalive settings for ipvs loadbalancer used e.g. by docker swarm.
+        # See https://web.archive.org/web/20200614124130if_/https://success.docker.com/article/ipvs-connection-timeout-issue
+        # for more details.
+        sysctls:
+            - net.ipv4.tcp_keepalive_time=600
         labels:
             - "traefik.enable=true"
             - "traefik.http.services.worker.loadbalancer.server.port=8080"
@@ -270,6 +285,11 @@ services:
             - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
         environment:
             - POSTGRES_HOST_AUTH_METHOD=trust
+        # Tune tcp keepalive settings for ipvs loadbalancer used e.g. by docker swarm.
+        # See https://web.archive.org/web/20200614124130if_/https://success.docker.com/article/ipvs-connection-timeout-issue
+        # for more details.
+        sysctls:
+            - net.ipv4.tcp_keepalive_time=600
 
     # Message queue
     rabbitmq:
