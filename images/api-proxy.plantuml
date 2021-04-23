@@ -1,0 +1,46 @@
+@startuml
+
+skinparam monochrome true
+
+actor User
+participant "Traefik" as T
+participant "API-Proxy" as P
+participant "FACT-Finder" as F
+
+User -> T:  Request rest/v2
+activate T
+
+T -> P: Request rest/v2
+activate P
+
+P -> T: Request rest/v3
+deactivate P
+
+T -> F: Request rest/v3
+activate F
+
+F -> T: Response rest/v3
+deactivate F
+
+T -> P: Response rest/v3
+activate P
+
+P -> T: Response rest/v2
+deactivate P
+
+T -> User: Response rest/v2
+deactivate T
+
+
+User -> T: Request rest/v3
+activate T
+
+T -> F: Request rest/v3
+activate F
+
+F -> T: Response rest/v3
+deactivate F
+
+T -> User: Response rest/v3
+deactivate T
+@enduml

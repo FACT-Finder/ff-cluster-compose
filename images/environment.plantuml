@@ -1,0 +1,35 @@
+@startuml
+skinparam monochrome true
+
+object "Load balancer" as lb
+object "UI" as ui
+object "Director" as director
+object "API-Proxy Director" as apidirector
+object "API-Proxy Worker" as apiworker
+object "Analytics + UI" as analytics
+object "PostgreSQL" as postgres
+object "RabbitMQ" as rabbitmq
+
+package Workers <<Rectangle>> {
+  object "Worker 2" as w2
+  object "Worker 1" as w1
+}
+
+lb <--> ui
+lb --> director
+lb <--> Workers
+lb <--> apidirector
+lb <--> apiworker
+lb <--> analytics
+
+Workers --> analytics
+Workers --> postgres
+Workers --> rabbitmq
+
+director --> analytics
+director --> postgres
+director --> rabbitmq
+
+analytics --> rabbitmq
+analytics --> postgres
+@enduml
