@@ -260,6 +260,11 @@ services:
             - FF_URL=http://traefik:8090/director/fact-finder
             # Set to the current API version of FACT-Finder
             - FF_API_VERSION=v4
+        # Tune tcp keepalive settings for ipvs loadbalancer used e.g. by docker swarm.
+        # See https://web.archive.org/web/20200614124130if_/https://success.docker.com/article/ipvs-connection-timeout-issue
+        # for more details.
+        sysctls:
+            - net.ipv4.tcp_keepalive_time=600
         depends_on:
             - director
             - postgres
