@@ -211,20 +211,33 @@ services:
             - "127.0.0.1:8080:8080"
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
-    
+
     # UI pointing towards the director
-    director-ui:
+    director-ui4:
+        image: ${REGISTRY}/ui4/ng:${FF_VERSION}
+        environment:
+            - FACT_FINDER_URL=http://director:8080/fact-finder
+            - ANALYTICS_URL=http://analytics:9000
+            - FACT_FINDER_GWT_UI_URL=http://director-gwt-ui:8080/fact-finder-ui
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.services.ui.loadbalancer.server.port=80"
+            - "traefik.http.routers.ui.rule=PathPrefix(`/fact-finder-ui`)"
+            - "traefik.http.routers.ui.entrypoints=web"
+            - "traefik.http.routers.ui.middlewares=\
+                strip-ffui-prefix@docker"
+            - "traefik.http.middlewares.strip-ffui-prefix\
+                .stripprefix.prefixes=/fact-finder-ui"
+
+
+    # Classic GWT UI included in ui4
+    director-gwt-ui:
         image: ${REGISTRY}/ui/ng:${FF_VERSION}
         user: factfinder
         environment:
             - "JAVA_OPTS=-Dserver.url=\
               http://traefik:8090/director/fact-finder/ui/ws/soap/ -Xmx3g"
-        labels:
-            - "traefik.enable=true"
-            - "traefik.http.services.ui.loadbalancer.server.port=8080"
-            - "traefik.http.routers.ui.rule=PathPrefix(`/fact-finder-ui`)"
-            - "traefik.http.routers.ui.entrypoints=web"
-    
+
     # Director which is used to change configuration via UI, receive delta-updates, etc.
     director:
         image: ${REGISTRY}/ff/ng:${FF_VERSION}
@@ -234,11 +247,8 @@ services:
             - JAVA_OPTS=-Xmx3g -Dfff.node.logs.subdirectory=director
             # Internal resources directory
             - FACTFINDER_RESOURCES=/home/factfinder
-            # Change the host when running the director behind a reverse proxy. In this example, traefik serves the director on localhost/director
-            - server.public.url=http://localhost/director/fact-finder
-            # Change the host when running analytics behind a reverse proxy. In this example, traefik serves analytics on localhost/analytics
+            # URL pointing towards analytics internal/external
             - analytics.public.url=http://localhost/analytics
-            # URL pointing towards analytics
             - analytics.url=http://analytics:9000
             # Use postgres database for product data
             - importer.dialect=POSTGRES
@@ -253,6 +263,7 @@ services:
             # Message queue for features like A/B testing. Change login data according to your settings.
             # For further information please refer to the RabbitMQ documentation
             - rabbitmq.uri=amqp://rabbitmquser:rabbitmqsecurepassword@rabbitmq:5672
+            - trustHttpForwardedHeaders=true
         # Tune tcp keepalive settings for ipvs loadbalancer used e.g. by docker swarm.
         # See https://web.archive.org/web/20200614124130if_/https://success.docker.com/article/ipvs-connection-timeout-issue
         # for more details.
@@ -272,7 +283,7 @@ services:
         volumes:
             # Mount resource directory for FACT-Finder configuration
             - ./resources:/home/factfinder/fact-finder
-    
+
     # Worker 1 to respond to search requests. You can add more workers.
     worker-1:
         image: ${REGISTRY}/ff/ng:${FF_VERSION}
@@ -332,7 +343,7 @@ services:
         volumes:
             # Mount resource directory for FACT-Finder configuration
             - ./resources:/home/factfinder/fact-finder
-    
+
     # Worker 2 to respond to search requests. You can add more workers.
     worker-2:
         image: ${REGISTRY}/ff/ng:${FF_VERSION}
@@ -455,6 +466,11 @@ services:
             - FF_URL=http://traefik:8090/director/fact-finder
             # Set to the current API version of FACT-Finder
             - FF_API_VERSION=v4
+        # Tune tcp keepalive settings for ipvs loadbalancer used e.g. by docker swarm.
+        # See https://web.archive.org/web/20200614124130if_/https://success.docker.com/article/ipvs-connection-timeout-issue
+        # for more details.
+        sysctls:
+            - net.ipv4.tcp_keepalive_time=600
         depends_on:
             - director
             - postgres
