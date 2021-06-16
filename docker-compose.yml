@@ -21,17 +21,30 @@ services:
             - /var/run/docker.sock:/var/run/docker.sock
 
     # UI pointing towards the director
-    director-ui:
+    director-ui4:
+        image: ${REGISTRY}/ui4/ng:${FF_VERSION}
+        environment:
+            - FACT_FINDER_URL=http://director:8080/fact-finder
+            - ANALYTICS_URL=http://analytics:9000
+            - FACT_FINDER_GWT_UI_URL=http://director-gwt-ui:8080/fact-finder-ui
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.services.ui.loadbalancer.server.port=80"
+            - "traefik.http.routers.ui.rule=PathPrefix(`/fact-finder-ui`)"
+            - "traefik.http.routers.ui.entrypoints=web"
+            - "traefik.http.routers.ui.middlewares=\
+                strip-ffui-prefix@docker"
+            - "traefik.http.middlewares.strip-ffui-prefix\
+                .stripprefix.prefixes=/fact-finder-ui"
+
+
+    # Classic GWT UI included in ui4
+    director-gwt-ui:
         image: ${REGISTRY}/ui/ng:${FF_VERSION}
         user: factfinder
         environment:
             - "JAVA_OPTS=-Dserver.url=\
               http://traefik:8090/director/fact-finder/ui/ws/soap/ -Xmx3g"
-        labels:
-            - "traefik.enable=true"
-            - "traefik.http.services.ui.loadbalancer.server.port=8080"
-            - "traefik.http.routers.ui.rule=PathPrefix(`/fact-finder-ui`)"
-            - "traefik.http.routers.ui.entrypoints=web"
 
     # Director which is used to change configuration via UI, receive delta-updates, etc.
     director:
@@ -58,6 +71,7 @@ services:
             # Message queue for features like A/B testing. Change login data according to your settings.
             # For further information please refer to the RabbitMQ documentation
             - rabbitmq.uri=amqp://rabbitmquser:rabbitmqsecurepassword@rabbitmq:5672
+            - trustHttpForwardedHeaders=true
         # Tune tcp keepalive settings for ipvs loadbalancer used e.g. by docker swarm.
         # See https://web.archive.org/web/20200614124130if_/https://success.docker.com/article/ipvs-connection-timeout-issue
         # for more details.
@@ -225,7 +239,7 @@ services:
         image: ${REGISTRY}/ff-api-proxy/ng:${FF_VERSION}
         # Use the internal traefik entrypoint, such that the traefik
         # load balancer will be used. If you'd point directly to the swarm
-        # service, the swarm loadbalancer would be used without support for
+        # service, the swarm load balancer would be used without support for
         # sticky session and weights.
         #
         # Set target-version to the current API version of FACT-Finder
