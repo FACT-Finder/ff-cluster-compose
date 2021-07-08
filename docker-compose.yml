@@ -122,9 +122,9 @@ services:
             - oauth.client.secret=shared-secret
             # Import specific channels on startup which are configured accordingly
             - useImportOnStartup=false
-            # Automatically poll for new delta updates already applied on the
-            # director.
-            - useAutoDeltaSync=true
+            # Automatically poll for new imports & delta updates already
+            # applied on the director.
+            - useClusterSync=true
             # Disable scheduled jobs on workers. If you have to use scheduled
             # jobs on your worker, make sure to configure a separate scheduler
             # directory using
@@ -182,9 +182,9 @@ services:
             - oauth.client.secret=shared-secret
             # Import specific channels on startup which are configured accordingly
             - useImportOnStartup=false
-            # Automatically poll for new delta updates already applied on the
-            # director.
-            - useAutoDeltaSync=true
+            # Automatically poll for new imports & delta updates already
+            # applied on the director.
+            - useClusterSync=true
             # Disable scheduled jobs on workers. If you have to use scheduled
             # jobs on your worker, make sure to configure a separate scheduler
             # directory using
