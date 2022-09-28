@@ -213,7 +213,8 @@ services:
             - ./resources:/home/factfinder/fact-finder
 
     # Translates incoming requests on /director/fact-finder/rest/v2 or
-    # /director/fact-finder/rest/v3 to /director/fact-finder/rest/v4
+    # /director/fact-finder/rest/v3 to /director/fact-finder/rest/v4 or
+    # /director/fact-finder/rest/v4 to /director/fact-finder/rest/v5
     api-proxy-director:
         image: ${REGISTRY}/ff-api-proxy/ng:${FF_VERSION}
         # Set target-version to the current API version of FACT-Finder
