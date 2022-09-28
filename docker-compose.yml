@@ -219,7 +219,7 @@ services:
         # Set target-version to the current API version of FACT-Finder
         command: >
             --target http://traefik:8090/director/fact-finder
-            --target-version 4
+            --target-version 5
         labels:
             - "traefik.enable=true"
             - "traefik.http.services.api-proxy-director\
@@ -227,14 +227,15 @@ services:
             - "traefik.http.routers.api-proxy-director.entrypoints=web"
             # Create rules for every API version in use below target-version beginning from v2
             - "traefik.http.routers.api-proxy-director.rule=\
-                PathPrefix(`/director/fact-finder/rest/v2`) || PathPrefix(`/director/fact-finder/rest/v3`)"
+                PathPrefix(`/director/fact-finder/rest/v2`) || PathPrefix(`/director/fact-finder/rest/v3`) || PathPrefix(`/director/fact-finder/rest/v4`)"
             - "traefik.http.routers.api-proxy-director.middlewares=\
                 strip-api-proxy-director-prefix@docker"
             - "traefik.http.middlewares.strip-api-proxy-director-prefix.\
                 stripprefix.prefixes=/director/fact-finder"
 
     # Translates incoming requests on /worker/fact-finder/rest/v2 or
-    # /worker/fact-finder/rest/v3 to /worker/fact-finder/rest/v4
+    # /worker/fact-finder/rest/v3 to /worker/fact-finder/rest/v4 or
+    # /worker/fact-finder/rest/v4 to /worker/fact-finder/rest/v5
     api-proxy-worker:
         image: ${REGISTRY}/ff-api-proxy/ng:${FF_VERSION}
         # Use the internal traefik entrypoint, such that the traefik
@@ -253,7 +254,7 @@ services:
             - "traefik.http.routers.api-proxy-worker.entrypoints=web"
             # Create rules for every API version in use below target-version beginning from v2
             - "traefik.http.routers.api-proxy-worker.rule=\
-                PathPrefix(`/worker/fact-finder/rest/v2`) || PathPrefix(`/worker/fact-finder/rest/v3`)"
+                PathPrefix(`/worker/fact-finder/rest/v2`) || PathPrefix(`/worker/fact-finder/rest/v3`) || PathPrefix(`/worker/fact-finder/rest/v4`)"
             - "traefik.http.routers.api-proxy-worker.middlewares=\
                 strip-api-proxy-worker-prefix@docker"
             - "traefik.http.middlewares.strip-api-proxy-worker-prefix\
@@ -273,7 +274,7 @@ services:
             - OAUTH_URL=http://traefik:8090/director/fact-finder
             - FF_URL=http://traefik:8090/director/fact-finder
             # Set to the current API version of FACT-Finder
-            - FF_API_VERSION=v4
+            - FF_API_VERSION=v5
         # Tune tcp keepalive settings for ipvs loadbalancer used e.g. by docker swarm.
         # See https://web.archive.org/web/20200614124130if_/https://success.docker.com/article/ipvs-connection-timeout-issue
         # for more details.
