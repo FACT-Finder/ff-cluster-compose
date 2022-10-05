@@ -11,6 +11,8 @@ services:
             # Internal entrypoint for communication between services, e.g.
             # api-proxy -> worker -> director.
             - --entrypoints.internal.address=:8090
+            # Prevent overriding X-Forwarded headers for internal requests
+            - --entryPoints.internal.forwardedHeaders.insecure
             - --providers.docker.exposedbydefault=false
         labels:
             - "traefik.enable=true"
@@ -133,6 +135,7 @@ services:
             # Message queue for features like A/B testing. Change login data according to your settings.
             # For further information please refer to the RabbitMQ documentation
             - rabbitmq.uri=amqp://rabbitmquser:rabbitmqsecurepassword@rabbitmq:5672
+            - trustHttpForwardedHeaders=true
         # Tune tcp keepalive settings for ipvs loadbalancer used e.g. by docker swarm.
         # See https://web.archive.org/web/20200614124130if_/https://success.docker.com/article/ipvs-connection-timeout-issue
         # for more details.
@@ -221,6 +224,7 @@ services:
         command: >
             --target http://traefik:8090/director/fact-finder
             --target-version 5
+            --trust-proxy
         labels:
             - "traefik.enable=true"
             - "traefik.http.services.api-proxy-director\
@@ -248,6 +252,7 @@ services:
         command: >
             --target http://traefik:8090/worker/fact-finder
             --target-version 5
+            --trust-proxy
         labels:
             - "traefik.enable=true"
             - "traefik.http.services.api-proxy-worker\
