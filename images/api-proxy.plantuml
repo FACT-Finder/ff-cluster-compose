@@ -13,16 +13,16 @@ activate T
 T -> P: Request rest/v2
 activate P
 
-P -> T: Request rest/v3
+P -> T: Request rest/v5
 deactivate P
 
-T -> F: Request rest/v3
+T -> F: Request rest/v5
 activate F
 
-F -> T: Response rest/v3
+F -> T: Response rest/v5
 deactivate F
 
-T -> P: Response rest/v3
+T -> P: Response rest/v5
 activate P
 
 P -> T: Response rest/v2
@@ -32,15 +32,15 @@ T -> User: Response rest/v2
 deactivate T
 
 
-User -> T: Request rest/v3
+User -> T: Request rest/v5
 activate T
 
-T -> F: Request rest/v3
+T -> F: Request rest/v5
 activate F
 
-F -> T: Response rest/v3
+F -> T: Response rest/v5
 deactivate F
 
-T -> User: Response rest/v3
+T -> User: Response rest/v5
 deactivate T
 @enduml

@@ -2,7 +2,7 @@ version: '3.7'
 services:
     # Load balancer in the cluster
     traefik:
-        image: traefik:v2.1.2
+        image: traefik:v2.9.1
         command:
             - --api.insecure=true
             - --providers.docker
@@ -305,7 +305,7 @@ services:
 
     # Database for product data and delta updates
     postgres:
-        image: postgres:11.7-alpine
+        image: postgres:15.0-alpine
         shm_size: 256M
         volumes:
             - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -319,7 +319,7 @@ services:
 
     # Message queue
     rabbitmq:
-        image: rabbitmq:3.7.8-management
+        image: rabbitmq:3.11.1-management
         volumes:
             - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
             - ./rabbitmq/rabbitmq.definitions:/var/lib/rabbitmq/definitions.json

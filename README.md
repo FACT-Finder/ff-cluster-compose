@@ -149,7 +149,7 @@ translated request and sends it to the FACT-Finder afterwards. It works the same
 ##### Request flow
 
 In this example setup, search requests will be routed as in the following diagram, depending on whether they belong to API version
-`v2`, `v3` or `v4`.  Note that `v2` and `v3` requests pass the load balancer twice.
+`v2`, `v3`, `v4` or `v5`.  Note that `v2`, `v3` and `v4` requests pass the load balancer twice.
 
 ![API-Proxy Diagram](images/api-proxy.png)
 
